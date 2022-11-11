@@ -1,1 +1,1 @@
-export * from './interfaces/entity.repository';
+export * from './entity.repository';

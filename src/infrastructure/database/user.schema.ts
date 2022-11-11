@@ -1,28 +1,44 @@
 import mongoose, { Schema } from "mongoose";
 import { User, UserAuthentication } from "@domain/index";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+  {
     _id: String,
     Name: String,
     UserName: String,
     IsActive: Boolean,
     TenantId: String,
     CreatedOn: Date,
-    LastLogin: Date
-}, { timestamps: true });
+    LastLogin: Date,
+  },
+  { timestamps: true }
+);
 
-const userAuthSchema = new Schema({
+// Ensure virtual fields are serialised.
+userSchema.set("toObject", {
+  transform: function (doc, ret) {
+    ret.Id = doc._id;
+    delete ret._id;
+  },
+});
+
+const userAuthSchema = new Schema(
+  {
     _id: String,
     UserId: String,
     PasswordHash: String,
-    PasswordSalt: String
-}, { timestamps: true })
+    PasswordSalt: String,
+  },
+  { timestamps: true }
+);
 
 export function buildUserSchema() {
-    return mongoose.model<User>('Users', userSchema);
+  return mongoose.model<User>("Users", userSchema);
 }
 
 export function buildUserAuthSchema() {
-    return mongoose.model<UserAuthentication>('UserAuthentications', userAuthSchema);
+  return mongoose.model<UserAuthentication>(
+    "UserAuthentications",
+    userAuthSchema
+  );
 }
-

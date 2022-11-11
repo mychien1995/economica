@@ -22,6 +22,7 @@ export class EntityRepository<T> implements IEntityRepository<T>{
         if (isUniqueEntity(body)) {
             document._id = body.Id;
         }
+        else document._id = new mongoose.Types.ObjectId();
         await document.save();
     }
 

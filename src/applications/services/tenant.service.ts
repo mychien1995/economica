@@ -1,6 +1,6 @@
 import { Inject, Service } from 'typedi';
 import { Tenant } from '../../domain';
-import { IEntityRepository } from '../interfaces/entity.repository';
+import { IEntityRepository } from '../persistence/entity.repository';
 
 @Service()
 export class TenantService {
