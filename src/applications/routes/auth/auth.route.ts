@@ -79,12 +79,46 @@ authRouter.post(
       return res.status(400).json({ errors: ["Invalid username or password"] });
     }
     const jwt = require("jsonwebtoken");
-    const fs = require("fs");
     const token = jwt.sign(
       { userName: user.UserName, displayName: user.Name },
-      "SOMEKEY",
+      process.env.JWT_KEY,
       { expiresIn: 60 * 60 }
     );
     return res.json({ success: true, token: token });
   }
 );
+
+export const authenticationFilter = async (req: any, res: any, next: any) => {
+  const jwt = require("jsonwebtoken");
+  const token = req.header("Authorization").replace("Bearer ", "");
+  const data = jwt.verify(token, process.env.JWT_KEY);
+  const tenantId = req.TenantId;
+  try {
+    const userRepo = getRepository<User>("User");
+    const users = await userRepo.query({
+      UserName: data.UserName,
+      IsActive: true,
+      TenantId: tenantId,
+    });
+    if (!users || users.length == 0) {
+      return res
+        .status(401)
+        .json({ errors: ["You are not authorized to access this resource"] });
+    }
+    req.user = users[0];
+    next();
+  } catch (error) {
+    res
+      .status(401)
+      .send({ errors: ["You are not authorized to access this resource"] });
+  }
+};
+
+export const masterApiKeyFilter = async (req: any, res: any, next: any) => {
+  const token = req.header("x-api-key");
+  if (token != process.env.MASTER_API_KEY) {
+    res
+      .status(401)
+      .send({ errors: ["You are not authorized to access this resource"] });
+  }
+};
